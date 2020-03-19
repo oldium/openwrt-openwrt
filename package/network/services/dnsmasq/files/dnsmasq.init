@@ -202,6 +202,19 @@ append_interface_name() {
 	xappend "--interface-name=$1,$2"
 }
 
+append_bus() {
+	local section="$1"
+	local option="$2"
+	local bus_option="$3"
+	local _loctmp
+	config_get _loctmp "$section" "$option"
+	case "$_loctmp" in
+		""|0|off|false|no|disabled) ;;
+		1|on|true|yes|enabled) xappend "$bus_option" ;;
+		*) xappend "$bus_option=$_loctmp" ;;
+	esac
+}
+
 filter_dnsmasq() {
 	local cfg="$1" func="$2" match_cfg="$3" found_cfg
 
@@ -878,8 +891,8 @@ dnsmasq_start()
 	append_bool "$cfg" noresolv "--no-resolv"
 	append_bool "$cfg" localise_queries "--localise-queries"
 	append_bool "$cfg" readethers "--read-ethers"
-	append_bool "$cfg" dbus "--enable-dbus"
-	append_bool "$cfg" ubus "--enable-ubus"	1
+	append_bus "$cfg" dbus "--enable-dbus"
+	append_bus "$cfg" ubus "--enable-ubus"
 	append_bool "$cfg" expandhosts "--expand-hosts"
 	config_get tftp_root "$cfg" "tftp_root"
 	[ -n "$tftp_root" ] && mkdir -p "$tftp_root" && append_bool "$cfg" enable_tftp "--enable-tftp"
